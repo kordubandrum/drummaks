@@ -141,3 +141,55 @@
   window.addEventListener('scroll', vidna, { passive: true });
   vidna();
 })();
+
+/* Видео первого экрана: на телефон уходит лёгкая вертикальная версия (0,7 МБ вместо 2,5) */
+(function () {
+  var v = document.querySelector('.hero__video');
+  if (!v) return;
+  var narrow = window.matchMedia('(max-width: 759px)').matches;
+  if (!narrow && v.dataset.posterWide) v.poster = v.dataset.posterWide;
+  var src = narrow ? v.dataset.narrow : v.dataset.wide;
+  var tiho = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var save = navigator.connection && navigator.connection.saveData;
+  if (!src || tiho || save) return; // остаётся кадр-заставка
+  var el = document.createElement('source');
+  el.src = src; el.type = 'video/mp4';
+  v.appendChild(el);
+  v.load();
+  var go = v.play();
+  if (go && go.catch) go.catch(function () {});
+})();
+
+/* Появление блоков при прокрутке и лёгкое движение видео на первом экране */
+(function () {
+  var tiho = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var reveals = document.querySelectorAll('.reveal');
+
+  if (tiho.matches || !('IntersectionObserver' in window)) {
+    reveals.forEach(function (el) { el.classList.add('is-in'); });
+    return;
+  }
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
+  reveals.forEach(function (el) { io.observe(el); });
+
+  var bg = document.querySelector('.hero__bg');
+  var hero = document.querySelector('.hero');
+  if (!bg || !hero) return;
+  var tick = false;
+  window.addEventListener('scroll', function () {
+    if (tick) return;
+    tick = true;
+    requestAnimationFrame(function () {
+      var y = window.scrollY;
+      if (y < hero.offsetHeight) {
+        bg.style.transform = 'translate3d(0,' + (y * 0.16) + 'px,0) scale(' + (1.1 + y / 12000) + ')';
+      }
+      tick = false;
+    });
+  }, { passive: true });
+})();

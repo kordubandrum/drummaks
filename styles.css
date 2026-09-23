@@ -100,8 +100,6 @@ p { margin: 0 0 16px; max-width: 62ch; }
 .hero__price { margin: 0; font-size: 15px; max-width: 26ch; }
 .hero__price b { color: var(--bronza); }
 .hero__bottom { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; margin-top: 28px; font-size: 14px; }
-.hero__rating { color: var(--svet); }
-.hero__rating b { color: var(--bronza); font-size: 16px; }
 .hero__sound {
   background: rgba(20,18,16,.6); color: var(--svet); border: 1px solid var(--linia);
   font: 600 14px/1 var(--shrift); border-radius: 2px; padding: 11px 14px 11px 32px; cursor: pointer; position: relative;
@@ -269,16 +267,6 @@ section[id] { scroll-margin-top: calc(var(--shapka) + 8px); }
 .player video { display: block; width: 100%; max-height: 80vh; }
 .player__close { position: absolute; right: 0; top: -44px; width: 40px; height: 40px; border: 0; background: none; color: #fff; font-size: 34px; line-height: 1; cursor: pointer; }
 
-/* Нотная запись ритма */
-.groove { display: block; width: 100%; max-width: 620px; height: auto; margin: 14px 0 32px; overflow: visible; }
-.groove .st { stroke: var(--linia); stroke-width: 1.5; }
-.groove .st.bar { stroke: #4A423A; stroke-width: 2; }
-.groove .clef, .groove .beam { fill: #4A423A; }
-.groove .n { fill: var(--bronza); stroke: var(--bronza); }
-.groove .n .x { stroke-width: 2.4; stroke-linecap: round; fill: none; }
-.groove .n .stem { stroke-width: 1.6; }
-.groove .n ellipse { stroke: none; }
-
 /* Планшет и компьютер */
 @media (min-width: 760px) {
   :root { --pole: 32px; --sec: 104px; --shapka: 72px; }
@@ -333,111 +321,6 @@ section[id] { scroll-margin-top: calc(var(--shapka) + 8px); }
   @keyframes kap { 0%, 100% { transform: scaleY(.3); opacity: .5 } 50% { transform: scaleY(1); opacity: 1 } }
 }
 
-/* Установка, на которой можно поиграть: фото + куски того же фото, вырезанные по эллипсам */
-.kit { margin: 0 0 40px; }
-.kit__lead { font-weight: 600; margin-bottom: 14px; }
-.kit__scene {
-  position: relative;
-  margin-bottom: 18px;
-  border: 1px solid var(--linia);
-  border-radius: 4px;
-  overflow: hidden;
-  background: #0B0A09;
-}
-.kit__foto { position: relative; line-height: 0; }
-.kit__base { display: block; width: 100%; height: auto; }
-.kit__sloi { position: absolute; inset: 0; pointer-events: none; }
-
-.kit__part {
-  position: absolute; inset: 0;
-  background-image: url("media/ustanovka.jpg");
-  background-image: image-set(url("media/ustanovka.webp") type("image/webp"), url("media/ustanovka.jpg") type("image/jpeg"));
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  clip-path: ellipse(var(--rx) var(--ry) at var(--x) var(--y));
-  transform-origin: var(--x) var(--y);
-}
-.kit__part.is-hit { animation: udar .26s ease-out; }
-/* Блик от удара: тёмный барабан от одной яркости почти не меняется, свет нужен свой */
-.kit__part::after {
-  content: ""; position: absolute; inset: 0; opacity: 0;
-  background: radial-gradient(ellipse var(--rx) var(--ry) at var(--x) var(--y),
-              rgba(255, 226, 170, .55), rgba(255, 226, 170, 0) 100%);
-}
-.kit__part.is-hit::after { animation: blik .4s ease-out; }
-@keyframes blik { 0% { opacity: 1; } 100% { opacity: 0; } }
-.kit__part--cym.is-hit { animation: kachanie .8s cubic-bezier(.25, .7, .3, 1); }
-@keyframes udar {
-  0% { transform: scale(1) translateY(0); filter: brightness(1.5); }
-  22% { transform: scale(1.035) translateY(.3%); }
-  55% { transform: scale(1.008) translateY(0); }
-  100% { transform: scale(1) translateY(0); filter: brightness(1); }
-}
-@keyframes kachanie {
-  0% { transform: rotate(0deg); filter: brightness(1.55); }
-  16% { transform: rotate(2.4deg); }
-  44% { transform: rotate(-1.7deg); }
-  70% { transform: rotate(.9deg); }
-  88% { transform: rotate(-.4deg); }
-  100% { transform: rotate(0deg); filter: brightness(1); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .kit__part.is-hit, .kit__part--cym.is-hit { animation: vspyshka .3s ease-out; }
-  @keyframes vspyshka { 0% { filter: brightness(1.5); } 100% { filter: brightness(1); } }
-}
-
-.kit__zona {
-  position: absolute;
-  left: calc(var(--x) - var(--rx));
-  top: calc(var(--y) - var(--ry) * var(--zona, 1));
-  width: calc(var(--rx) * 2);
-  height: calc(var(--ry) * 2 * var(--zona, 1));
-  border: 0; border-radius: 50%; padding: 0;
-  background: transparent; color: var(--svet);
-  cursor: pointer;
-  display: grid; place-items: center;
-  -webkit-tap-highlight-color: transparent;
-}
-.kit__zona--cym { --zona: 2.6; }
-.kit__zona:focus-visible { outline: 3px solid var(--bronza); outline-offset: 2px; }
-
-.kit__key {
-  font: 700 14px/1 var(--shrift);
-  color: #17120B;
-  background: rgba(224, 180, 97, .92);
-  border-radius: 20px;
-  padding: 4px 9px;
-  opacity: 0;
-  transition: opacity .2s;
-}
-.kit.is-keys .kit__key { opacity: 1; }
-
-.kit__panel { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
-.kit__how { color: var(--svet-2); font-size: 16px; max-width: 70ch; }
-.kit__legend { display: none; color: var(--svet-2); font-size: 15px; }
-.kit.is-keys .kit__legend { display: block; }
-
-.kit__keys {
-  background: transparent; color: var(--svet-2); border: 1px solid var(--linia); border-radius: 2px;
-  font: 800 14px/1 var(--zag); text-transform: uppercase; letter-spacing: .05em;
-  padding: 14px 22px; cursor: pointer; transition: border-color .2s, color .2s;
-}
-.kit__keys:hover { border-color: var(--bronza); color: var(--svet); }
-.kit__keys[aria-pressed="true"] { border-color: var(--bronza); color: var(--svet); }
-
-.pads__play {
-  background: transparent; color: var(--svet); border: 1px solid var(--bronza); border-radius: 2px;
-  font: 800 14px/1 var(--zag); text-transform: uppercase; letter-spacing: .05em;
-  padding: 14px 22px; cursor: pointer; transition: background .2s, color .2s;
-}
-.pads__play:hover { background: var(--bronza); color: #17120B; }
-.pads__play[aria-pressed="true"] { background: var(--bronza); color: #17120B; }
-
-@media (max-width: 599px) {
-  .kit__key { font-size: 12px; padding: 3px 7px; }
-  .kit__panel .pads__play, .kit__panel .kit__keys { flex: 1 1 100%; }
-}
-
 /* Кнопка «на раздел выше» */
 .vverh {
   position: fixed; right: 16px; bottom: 84px; z-index: 25;
@@ -454,10 +337,6 @@ section[id] { scroll-margin-top: calc(var(--shapka) + 8px); }
 .vverh:hover { background: var(--bronza); color: #17120B; }
 .vverh svg { width: 20px; height: 20px; display: block; }
 @media (min-width: 1024px) { .vverh { bottom: 28px; right: 28px; } }
-
-/* Нота, которая звучит прямо сейчас */
-.groove .n.is-on { fill: #FFE1A6; stroke: #FFE1A6; }
-.groove.is-playing .n { transition: fill .09s linear, stroke .09s linear; }
 
 /* Состояния наведения */
 .nav a { position: relative; }
