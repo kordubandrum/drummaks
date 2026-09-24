@@ -93,7 +93,11 @@
     btn.disabled = true;
     btn.textContent = 'Отправляем…';
 
-    fetch('send.php', { method: 'POST', body: new FormData(form) })
+    // Куда уходит заявка, задано в разметке формы: на GitHub Pages это адрес
+    // серверной функции, на хостинге с PHP хватит send.php рядом со страницей.
+    // URLSearchParams вместо FormData: так тело письма читают обе стороны без библиотек.
+    var kuda = form.dataset.otpravka || 'send.php';
+    fetch(kuda, { method: 'POST', body: new URLSearchParams(new FormData(form)) })
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (!data.ok) throw new Error(data.error || 'fail');
