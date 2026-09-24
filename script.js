@@ -93,26 +93,78 @@
     btn.disabled = true;
     btn.textContent = 'Отправляем…';
 
-    // Куда уходит заявка, задано в разметке формы: на GitHub Pages это адрес
-    // серверной функции, на хостинге с PHP хватит send.php рядом со страницей.
-    // URLSearchParams вместо FormData: так тело письма читают обе стороны без библиотек.
+    // Куда уходит заявка, задано в разметке формы: на бесплатном хостинге это адрес
+    // приёмного скрипта, на хостинге с PHP хватит send.php рядом со страницей.
     var kuda = form.dataset.otpravka || 'send.php';
-    fetch(kuda, { method: 'POST', body: new URLSearchParams(new FormData(form)) })
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        if (!data.ok) throw new Error(data.error || 'fail');
+    var dannye = new URLSearchParams(new FormData(form));
+
+    // Скрипт Google перебрасывает запрос на соседний адрес и при этом теряет POST
+    // примерно в трети случаев. GET переброс переживает, поэтому туда шлём ссылкой.
+    var cherezGoogle = kuda.indexOf('script.google.com') !== -1;
+
+    // Google примерно в трети случаев не отдаёт ответ на переадресации.
+    // Поэтому пробуем до трёх раз; номер заявки не даёт ей задвоиться.
+    dannye.set('nomer', Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
+
+    function poslat() {
+      return cherezGoogle
+        ? fetch(kuda + '?' + dannye.toString(), { method: 'GET' })
+        : fetch(kuda, { method: 'POST', body: dannye });
+    }
+
+    function popytka(ostalos) {
+      return poslat()
+        .then(function (r) { return r.text(); })
+        .then(function (t) {
+          var o = {};
+          try { o = JSON.parse(t); } catch (e) { o = {}; }
+          if (o.ok === true) return true;
+          if (o.ok === false) return false;      // заявку не приняли, повтор не поможет
+          throw new Error('нет ответа');
+        })
+        .catch(function (e) {
+          if (ostalos <= 0) throw e;
+          return new Promise(function (r) { setTimeout(r, 1500); }).then(function () {
+            return popytka(ostalos - 1);
+          });
+        });
+    }
+
+    var zapros = popytka(2);
+
+    // Google отвечает медленно, до полуминуты. Человеку об этом говорим,
+    // чтобы он не решил, что сайт завис, и не ушёл.
+    var dolgo = setTimeout(function () {
+      if (msg.textContent) return;
+      msg.textContent = 'Отправляем заявку. Иногда это занимает до полуминуты, не закрывайте страницу.';
+    }, 4000);
+
+    var pozdno = setTimeout(function () { zavershit(false); }, 90000);
+    var gotovo = false;
+
+    function zavershit(uspeh) {
+      if (gotovo) return;
+      gotovo = true;
+      clearTimeout(dolgo);
+      clearTimeout(pozdno);
+      msg.className = 'form__msg';
+      if (uspeh) {
         form.reset();
         ageField.hidden = true;
         msg.classList.add('is-ok');
         msg.textContent = 'Заявка отправлена. Максим свяжется с вами в течение дня.';
         btn.textContent = 'Заявка отправлена';
-      })
-      .catch(function () {
+      } else {
         msg.classList.add('is-error');
         msg.innerHTML = 'Заявка не отправилась. Позвоните или напишите в телеграм: <a href="tel:+79883983442">+7 988 398-34-42</a>.';
         btn.disabled = false;
         btn.textContent = 'Отправить заявку';
-      });
+      }
+    }
+
+    zapros
+      .then(function (uspeh) { zavershit(uspeh); })
+      .catch(function () { zavershit(false); });
   });
 })();
 
