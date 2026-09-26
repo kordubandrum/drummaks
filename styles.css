@@ -148,8 +148,8 @@ section[id] { scroll-margin-top: calc(var(--shapka) + 8px); }
 }
 .gal__row img:hover { filter: none; }
 @media (prefers-reduced-motion: no-preference) {
-  .gal__row { animation: edet 46s linear infinite; }
-  .gal__row--back { animation-direction: reverse; animation-duration: 58s; }
+  .gal__row { animation: edet 126s linear infinite; }
+  .gal__row--back { animation-direction: reverse; animation-duration: 131s; }
   @keyframes edet { to { transform: translateX(-50%); } }
 }
 
