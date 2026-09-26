@@ -1,3 +1,15 @@
+// Сайт всегда открывается с самого начала. Браузер телефона сам возвращает
+// человека туда, где он остановился, а меню дописывает в адрес метку раздела
+// (#ceny и т. п.), и сайт открывался с середины. Метку стираем, прокрутку сбрасываем.
+(function () {
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  var naverh = function () { window.scrollTo(0, 0); };
+  naverh();
+  window.addEventListener('load', naverh);
+  window.addEventListener('pageshow', function (e) { if (e.persisted) naverh(); });
+})();
+
 (function () {
   var form = document.getElementById('form');
   var F = form.elements;
